@@ -103,50 +103,156 @@
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--background-modifier-border);
+  padding-bottom: 0.5em;
+}
+
+/* User info bar */
+.vault-user-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  margin-bottom: 0.75em;
+  padding: 0.5em 0.6em;
+  background: var(--background-secondary);
+  border-radius: 6px;
+  font-size: 0.85em;
+}
+
+.vault-user-label {
+  color: var(--text-muted);
+}
+
+.vault-user-badge {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  padding: 0.15em 0.6em;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.95em;
+}
+
+/* Empty state */
+.vault-tasks-empty-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2em;
+  color: var(--text-faint);
+}
+
+.vault-tasks-empty-icon {
+  font-size: 2.5em;
+  margin-bottom: 0.3em;
+  opacity: 0.5;
 }
 
 .vault-tasks-empty {
-  color: var(--text-faint);
   font-style: italic;
   font-size: 0.9em;
-}
-
-.vault-tasks-list {
-  list-style: none;
-  padding: 0;
   margin: 0;
 }
 
-.vault-task-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5em;
-  padding: 0.4em 0;
-  border-bottom: 1px solid var(--background-modifier-border);
+/* Task group */
+.vault-task-group {
+  margin-bottom: 0.75em;
+}
+
+.vault-file-header {
+  margin-bottom: 0.3em;
+}
+
+.vault-file-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.2em 0.6em;
+  background: var(--background-secondary-alt);
+  border-radius: 4px;
+  font-size: 0.8em;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.vault-file-pill:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.vault-file-icon {
   font-size: 0.9em;
 }
 
-.vault-task-item:last-child {
-  border-bottom: none;
+.vault-task-count {
+  background: var(--background-modifier-border);
+  border-radius: 3px;
+  padding: 0 0.35em;
+  font-size: 0.9em;
+  color: var(--text-faint);
+}
+
+/* Task card */
+.vault-task-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6em;
+  padding: 0.5em 0.6em;
+  margin: 0.2em 0;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.vault-task-card:hover {
+  background: var(--background-secondary);
+  border-color: var(--background-modifier-border-hover);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .vault-task-checkbox {
   margin-top: 0.15em;
   cursor: pointer;
   accent-color: var(--interactive-accent);
+  flex-shrink: 0;
+  width: 1.1em;
+  height: 1.1em;
+}
+
+.vault-task-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15em;
+  flex: 1;
+  min-width: 0;
 }
 
 .vault-task-desc {
-  flex: 1;
   color: var(--text-normal);
   line-height: 1.4;
+  font-size: 0.9em;
+  word-break: break-word;
 }
 
-.vault-task-meta {
+.vault-task-done {
+  text-decoration: line-through;
   color: var(--text-faint);
-  font-size: 0.8em;
-  white-space: nowrap;
-  margin-top: 0.1em;
+}
+
+.vault-task-location {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 0.75em;
+  color: var(--text-faint);
+}
+
+.vault-task-loc-line {
+  background: var(--background-modifier-border);
+  padding: 0.05em 0.4em;
+  border-radius: 3px;
 }
 
 /* User modals */

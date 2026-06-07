@@ -2,6 +2,6 @@
   "settings": {
     "adminUsername": "admin",
     "adminPassword": "admin",
-    "usersDir": "anjaylogin/login/logingaksih/_users"
+    "usersDir": "99_Tools/login/logingaksih/_users"
   }
 }

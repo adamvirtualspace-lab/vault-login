@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf } from 'obsidian';
+import { ItemView, WorkspaceLeaf, TFile } from 'obsidian';
 import { Task } from './models';
 import { TaskScanner } from './taskScanner';
 
@@ -56,33 +56,71 @@ export class TaskView extends ItemView {
     content.empty();
     content.addClass('vault-tasks-container');
 
+    // User info header
+    const userBar = content.createEl('div', { cls: 'vault-user-bar' });
+    userBar.createEl('span', { text: `Logged in as `, cls: 'vault-user-label' });
+    const userBadge = userBar.createEl('span', { text: this._currentUser, cls: 'vault-user-badge' });
+    userBadge.setAttr('data-username', this._currentUser);
+
+    // Task count
     content.createEl('h3', { text: `My Tasks (${this.taskItems.length})` });
 
     if (this.taskItems.length === 0) {
-      content.createEl('p', { text: 'No tasks assigned to you.', cls: 'vault-tasks-empty' });
+      const emptyBox = content.createEl('div', { cls: 'vault-tasks-empty-box' });
+      emptyBox.createEl('span', { text: '\u2714', cls: 'vault-tasks-empty-icon' });
+      emptyBox.createEl('p', { text: 'No tasks assigned to you.', cls: 'vault-tasks-empty' });
       return;
     }
 
-    const list = content.createEl('ul', { cls: 'vault-tasks-list' });
-
+    // Group tasks by file
+    const groups = new Map<string, Task[]>();
     for (const task of this.taskItems) {
-      const item = list.createEl('li', { cls: 'vault-task-item' });
+      const list = groups.get(task.file) || [];
+      list.push(task);
+      groups.set(task.file, list);
+    }
 
-      const checkbox = item.createEl('input', { type: 'checkbox' });
-      checkbox.addClass('vault-task-checkbox');
-      checkbox.checked = task.checked;
+    for (const [filePath, tasks] of groups) {
+      const group = content.createEl('div', { cls: 'vault-task-group' });
 
-      const desc = item.createEl('span', { text: task.description, cls: 'vault-task-desc' });
+      // File header — clickable to open the note
+      const fileHeader = group.createEl('div', { cls: 'vault-file-header' });
+      const filePill = fileHeader.createEl('span', { cls: 'vault-file-pill' });
+      filePill.createEl('span', { text: '\uD83D\uDCC4 ', cls: 'vault-file-icon' });
+      filePill.createEl('span', { text: filePath });
+      filePill.createEl('span', { text: `  ${tasks.length}`, cls: 'vault-task-count' });
 
-      const meta = item.createEl('span', { cls: 'vault-task-meta' });
-      meta.textContent = ` \u2014 ${task.file}:${task.line + 1}`;
-
-      checkbox.addEventListener('change', async () => {
-        const oldChecked = task.checked;
-        task.checked = !oldChecked;
-        await this.scanner.toggleTask(task);
-        await this.refresh();
+      const tf = this.app.vault.getAbstractFileByPath(filePath);
+      filePill.addEventListener('click', () => {
+        if (tf instanceof TFile) {
+          this.app.workspace.getLeaf(false).openFile(tf);
+        }
       });
+
+      // Tasks for this file
+      for (const task of tasks) {
+        const card = group.createEl('div', { cls: 'vault-task-card' });
+
+        const checkbox = card.createEl('input', { type: 'checkbox' });
+        checkbox.addClass('vault-task-checkbox');
+        checkbox.checked = task.checked;
+
+        const body = card.createEl('div', { cls: 'vault-task-body' });
+
+        const desc = body.createEl('span', {
+          text: task.description,
+          cls: task.checked ? 'vault-task-desc vault-task-done' : 'vault-task-desc',
+        });
+
+        const loc = body.createEl('span', { cls: 'vault-task-location' });
+        loc.createEl('span', { text: `line ${task.line + 1}`, cls: 'vault-task-loc-line' });
+
+        checkbox.addEventListener('change', async () => {
+          task.checked = !task.checked;
+          await this.scanner.toggleTask(task);
+          await this.refresh();
+        });
+      }
     }
   }
 }
