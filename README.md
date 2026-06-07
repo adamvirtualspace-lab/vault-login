@@ -56,7 +56,9 @@ created: 2026-06-07
 
 The `_users/` folder appears in your file explorer like any other note. You can edit user details directly if needed.
 
-You can place `_users` **anywhere** in your vault — the plugin auto-detects it on startup. Just move the folder to any location and restart Obsidian; the setting updates automatically.
+You can place `_users` **anywhere** in your vault — the plugin auto-detects it on startup by recursively searching all directories (skipping `.obsidian`, `node_modules`, `.git`). Just move the folder to any location and restart Obsidian; the setting updates automatically.
+
+If no `_users` folder exists anywhere, the plugin falls back to the admin credentials in settings (`admin`/`admin` by default). Logging in with those creates the user file at the configured path.
 
 ---
 
@@ -154,6 +156,7 @@ The sidebar shows:
 
 ## Notes
 
-- **No encryption** — passwords are stored as plain text in `.md` frontmatter and plugin data
+- **No encryption** — passwords are stored as plain text in `.md` frontmatter
 - **Vault files are visible** while logged in — the login screen only blocks the workspace on startup
-- **Tasks scan all `.md` files** except those inside `_users/`
+- **Tasks scan all `.md` files** except those inside the configured users directory
+- **Session is in-memory only** — no data written to disk on login/logout; you log in each session
