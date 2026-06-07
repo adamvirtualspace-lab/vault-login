@@ -23,13 +23,18 @@ export default class VaultLoginPlugin extends Plugin {
 
   async onload(): Promise<void> {
     await this.loadSettings();
+    await this.detectUsersDir();
 
-    this.userManager = new UserManager(this.app, this.settings.usersDir);
     this.auth = new Auth();
-    this.taskScanner = new TaskScanner(this.app);
+    this.userManager = new UserManager(this.app, this.settings.usersDir);
+    this.taskScanner = new TaskScanner(this.app, this.settings.usersDir);
     this.loginOverlay = new LoginOverlay(async (username: string, password: string) => {
-      const ok = await this.auth.login(username, password, this.userManager);
+      const ok = await this.auth.login(username, password, this.userManager, {
+        username: this.settings.adminUsername,
+        password: this.settings.adminPassword,
+      });
       if (ok) {
+        this.userManager = new UserManager(this.app, this.settings.usersDir);
         await this.refreshTaskView();
       }
       return ok;
@@ -37,10 +42,9 @@ export default class VaultLoginPlugin extends Plugin {
 
     this.registerView(TASK_VIEW_TYPE, (leaf) => new TaskView(leaf, this.taskScanner));
 
-    await this.ensureAdminUser();
-
-    // Always show login on startup
-    this.loginOverlay.show();
+    this.app.workspace.onLayoutReady(() => {
+      this.loginOverlay.show();
+    });
 
     this.addCommand({
       id: 'login',
@@ -126,17 +130,32 @@ export default class VaultLoginPlugin extends Plugin {
     await this.saveData(data);
   }
 
-  private async ensureAdminUser(): Promise<void> {
-    const existing = await this.userManager.getUser(this.settings.adminUsername);
-    if (!existing) {
-      await this.userManager.createUser({
-        username: this.settings.adminUsername.toLowerCase(),
-        displayName: 'Admin',
-        role: 'admin',
-        password: this.settings.adminPassword,
-        created: new Date().toISOString().split('T')[0],
-      });
+  private async detectUsersDir(): Promise<void> {
+    try {
+      if (await this.app.vault.adapter.exists(this.settings.usersDir)) return;
+    } catch {}
+
+    const found = await this.findDir('_users', '', 0);
+    if (found) {
+      this.settings.usersDir = found;
+      await this.saveSettings();
     }
+  }
+
+  private async findDir(name: string, base: string, depth: number): Promise<string | null> {
+    if (depth > 10) return null;
+    try {
+      const items = await this.app.vault.adapter.list(base || '');
+      for (const fp of items.folders) {
+        const p = fp.replace(/\\/g, '/').replace(/\/$/, '');
+        const fn = p.split('/').pop() || '';
+        if (fn === '.obsidian' || fn === 'node_modules' || fn === '.git') continue;
+        if (fn === name) return p;
+        const sub = await this.findDir(name, p, depth + 1);
+        if (sub) return sub;
+      }
+    } catch {}
+    return null;
   }
 
   private async refreshTaskView(): Promise<void> {

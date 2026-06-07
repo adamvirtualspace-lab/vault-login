@@ -3,9 +3,11 @@ import { Task } from './models';
 
 export class TaskScanner {
   private app: App;
+  private usersDir: string;
 
-  constructor(app: App) {
+  constructor(app: App, usersDir: string) {
     this.app = app;
+    this.usersDir = usersDir;
   }
 
   async getAllTasks(): Promise<Task[]> {
@@ -13,7 +15,7 @@ export class TaskScanner {
     const tasks: Task[] = [];
 
     for (const file of files) {
-      if (file.path.startsWith('_users/')) continue;
+      if (file.path.startsWith(this.usersDir + '/')) continue;
       const content = await this.app.vault.read(file);
       const lines = content.split('\n');
 

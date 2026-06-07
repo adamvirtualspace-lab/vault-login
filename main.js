@@ -29,9 +29,20 @@ var Auth = class {
   constructor() {
     this.username = null;
   }
-  async login(username, password, userManager) {
+  async login(username, password, userManager, adminFallback) {
     const user = await userManager.getUser(username);
     if (user && user.password === password) {
+      this.username = username;
+      return true;
+    }
+    if (adminFallback && username === adminFallback.username && password === adminFallback.password) {
+      await userManager.createUser({
+        username: username.toLowerCase(),
+        displayName: "Admin",
+        role: "admin",
+        password,
+        created: new Date().toISOString().split("T")[0]
+      });
       this.username = username;
       return true;
     }
@@ -224,14 +235,15 @@ var LoginOverlay = class {
 // src/taskScanner.ts
 var import_obsidian2 = require("obsidian");
 var TaskScanner = class {
-  constructor(app) {
+  constructor(app, usersDir) {
     this.app = app;
+    this.usersDir = usersDir;
   }
   async getAllTasks() {
     const files = this.app.vault.getMarkdownFiles();
     const tasks = [];
     for (const file of files) {
-      if (file.path.startsWith("_users/"))
+      if (file.path.startsWith(this.usersDir + "/"))
         continue;
       const content = await this.app.vault.read(file);
       const lines = content.split("\n");
@@ -502,19 +514,25 @@ var DEFAULT_SETTINGS = {
 var VaultLoginPlugin = class extends import_obsidian6.Plugin {
   async onload() {
     await this.loadSettings();
-    this.userManager = new UserManager(this.app, this.settings.usersDir);
+    await this.detectUsersDir();
     this.auth = new Auth();
-    this.taskScanner = new TaskScanner(this.app);
+    this.userManager = new UserManager(this.app, this.settings.usersDir);
+    this.taskScanner = new TaskScanner(this.app, this.settings.usersDir);
     this.loginOverlay = new LoginOverlay(async (username, password) => {
-      const ok = await this.auth.login(username, password, this.userManager);
+      const ok = await this.auth.login(username, password, this.userManager, {
+        username: this.settings.adminUsername,
+        password: this.settings.adminPassword
+      });
       if (ok) {
+        this.userManager = new UserManager(this.app, this.settings.usersDir);
         await this.refreshTaskView();
       }
       return ok;
     });
     this.registerView(TASK_VIEW_TYPE, (leaf) => new TaskView(leaf, this.taskScanner));
-    await this.ensureAdminUser();
-    this.loginOverlay.show();
+    this.app.workspace.onLayoutReady(() => {
+      this.loginOverlay.show();
+    });
     this.addCommand({
       id: "login",
       name: "Log in",
@@ -590,17 +608,37 @@ var VaultLoginPlugin = class extends import_obsidian6.Plugin {
     data.settings = this.settings;
     await this.saveData(data);
   }
-  async ensureAdminUser() {
-    const existing = await this.userManager.getUser(this.settings.adminUsername);
-    if (!existing) {
-      await this.userManager.createUser({
-        username: this.settings.adminUsername.toLowerCase(),
-        displayName: "Admin",
-        role: "admin",
-        password: this.settings.adminPassword,
-        created: new Date().toISOString().split("T")[0]
-      });
+  async detectUsersDir() {
+    try {
+      if (await this.app.vault.adapter.exists(this.settings.usersDir))
+        return;
+    } catch (e) {
     }
+    const found = await this.findDir("_users", "", 0);
+    if (found) {
+      this.settings.usersDir = found;
+      await this.saveSettings();
+    }
+  }
+  async findDir(name, base, depth) {
+    if (depth > 10)
+      return null;
+    try {
+      const items = await this.app.vault.adapter.list(base || "");
+      for (const fp of items.folders) {
+        const p = fp.replace(/\\/g, "/").replace(/\/$/, "");
+        const fn = p.split("/").pop() || "";
+        if (fn === ".obsidian" || fn === "node_modules" || fn === ".git")
+          continue;
+        if (fn === name)
+          return p;
+        const sub = await this.findDir(name, p, depth + 1);
+        if (sub)
+          return sub;
+      }
+    } catch (e) {
+    }
+    return null;
   }
   async refreshTaskView() {
     const leaves = this.app.workspace.getLeavesOfType(TASK_VIEW_TYPE);

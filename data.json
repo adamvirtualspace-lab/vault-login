@@ -1,6 +1,7 @@
 {
-  "session": {
-    "username": "admin",
-    "loggedInAt": 1780819709524
+  "settings": {
+    "adminUsername": "admin",
+    "adminPassword": "admin",
+    "usersDir": "anjaylogin/login/logingaksih/_users"
   }
 }
