@@ -29,10 +29,6 @@ export class LoginOverlay {
 
     this.overlay.appendChild(card);
 
-    // Stop Obsidian's global handlers from stealing our focus/events
-    this.overlay.addEventListener('mousedown', (e) => e.stopPropagation());
-    this.overlay.addEventListener('pointerdown', (e) => e.stopPropagation());
-
     document.body.appendChild(this.overlay);
 
     const usernameInput = document.getElementById('vault-login-username') as HTMLInputElement;
@@ -40,10 +36,11 @@ export class LoginOverlay {
     const loginBtn = document.getElementById('vault-login-btn') as HTMLElement;
     const errorEl = document.getElementById('vault-login-error') as HTMLElement;
 
-    // Let inputs handle their own focus natively
-    usernameInput.addEventListener('mousedown', (e) => e.stopPropagation());
-    passwordInput.addEventListener('mousedown', (e) => e.stopPropagation());
-    loginBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+    // Trap events at the overlay so Obsidian can't steal focus
+    const trap = (e: Event) => e.stopPropagation();
+    this.overlay.addEventListener('pointerdown', trap);
+    this.overlay.addEventListener('mousedown', trap);
+    this.overlay.addEventListener('touchstart', trap);
 
     const doLogin = async () => {
       const username = usernameInput.value.trim();
