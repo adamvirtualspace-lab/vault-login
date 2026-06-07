@@ -19,11 +19,11 @@ export class TaskScanner {
 
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        const match = line.match(/^-\s+\[(\s|x)\]\s+(.+?)\s*\(assigned:\s*([^)]+)\)\s*$/i);
+        const match = line.match(/^\s*-\s+\[(\s|x)\]\s+(.*?)((?:\s+#[a-zA-Z][a-zA-Z0-9_-]*)+)\s*$/i);
         if (match) {
           const checked = match[1].toLowerCase() === 'x';
           const description = match[2].trim();
-          const assignees = match[3].split(',').map(a => a.trim().toLowerCase());
+          const assignees = match[3].trim().split(/\s+/).map(t => t.replace('#', '').toLowerCase());
           tasks.push({
             file: file.path,
             line: i,
@@ -51,11 +51,9 @@ export class TaskScanner {
     const lines = content.split('\n');
     const line = lines[task.line];
 
-    if (/^-\s+\[x\]/i.test(line)) {
-      lines[task.line] = line.replace(/^-\s+\[x\]\s*/i, '- [ ] ');
-    } else {
-      lines[task.line] = line.replace(/^-\s+\[\s\]\s*/, '- [x] ');
-    }
+    lines[task.line] = /\[x\]/i.test(line)
+      ? line.replace(/\[x\]/i, '[ ]')
+      : line.replace('[ ]', '[x]');
 
     await this.app.vault.modify(file, lines.join('\n'));
     new Notice(`Task ${lines[task.line].includes('[x]') ? 'completed' : 'reopened'}`);
