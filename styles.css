@@ -1,0 +1,189 @@
+/* vault-login overlay – covers entire workspace */
+.vault-login-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--background-primary);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vault-login-card {
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  padding: 2em 2.5em;
+  width: 320px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+.vault-login-card h2 {
+  margin: 0 0 1.2em;
+  text-align: center;
+  color: var(--text-normal);
+  font-size: 1.4em;
+}
+
+.vault-login-field {
+  margin-bottom: 1em;
+}
+
+.vault-login-field label {
+  display: block;
+  margin-bottom: 0.3em;
+  color: var(--text-muted);
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vault-login-input {
+  width: 100%;
+  padding: 0.6em 0.7em;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  color: var(--text-normal);
+  font-size: 0.95em;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.vault-login-input:focus {
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px var(--interactive-accent-hover);
+}
+
+.vault-login-btn {
+  width: 100%;
+  padding: 0.65em;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: 4px;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 0.5em;
+  transition: opacity 0.15s;
+}
+
+.vault-login-btn:hover {
+  opacity: 0.9;
+}
+
+.vault-login-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vault-login-error {
+  color: var(--text-error);
+  font-size: 0.85em;
+  margin-top: 0.6em;
+  text-align: center;
+  min-height: 1.2em;
+}
+
+/* Tasks sidebar */
+.vault-tasks-container {
+  padding: 0.75em 1em;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.vault-tasks-container h3 {
+  margin: 0 0 0.75em;
+  font-size: 1em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vault-tasks-empty {
+  color: var(--text-faint);
+  font-style: italic;
+  font-size: 0.9em;
+}
+
+.vault-tasks-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.vault-task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+  padding: 0.4em 0;
+  border-bottom: 1px solid var(--background-modifier-border);
+  font-size: 0.9em;
+}
+
+.vault-task-item:last-child {
+  border-bottom: none;
+}
+
+.vault-task-checkbox {
+  margin-top: 0.15em;
+  cursor: pointer;
+  accent-color: var(--interactive-accent);
+}
+
+.vault-task-desc {
+  flex: 1;
+  color: var(--text-normal);
+  line-height: 1.4;
+}
+
+.vault-task-meta {
+  color: var(--text-faint);
+  font-size: 0.8em;
+  white-space: nowrap;
+  margin-top: 0.1em;
+}
+
+/* User modals */
+.vault-user-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6em 0;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.vault-user-item:last-child {
+  border-bottom: none;
+}
+
+.vault-user-info strong {
+  display: block;
+  color: var(--text-normal);
+}
+
+.vault-user-role {
+  color: var(--text-muted);
+  font-size: 0.8em;
+}
+
+.vault-delete-btn {
+  color: var(--text-error);
+  cursor: pointer;
+  background: none;
+  border: 1px solid var(--text-error);
+  border-radius: 4px;
+  padding: 0.2em 0.6em;
+  font-size: 0.85em;
+  transition: background 0.15s;
+}
+
+.vault-delete-btn:hover {
+  background: var(--text-error);
+  color: var(--text-on-accent);
+}

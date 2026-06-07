@@ -1,0 +1,9 @@
+{
+  "id": "vault-login",
+  "name": "Vault Login",
+  "version": "1.0.0",
+  "minAppVersion": "1.5.7",
+  "description": "Login page before accessing the vault with task assignment via checkboxes.",
+  "author": "Vault Login",
+  "isDesktopOnly": false
+}
